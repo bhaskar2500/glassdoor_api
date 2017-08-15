@@ -1,13 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-from future.standard_library import install_aliases
-install_aliases()
-
-from urllib.parse import urlparse, urlencode
-from urllib.request import urlopen, Request
-from urllib.error import HTTPError
-
 import json
 import os
 
@@ -19,74 +11,35 @@ from flask import make_response
 app = Flask(__name__)
 
 
-@app.route('/webhook', methods=['POST'])
+@app.route('/webhook', methods=['GET','POST'])
 def webhook():
+    print('yes')
     req = request.get_json(silent=True, force=True)
-
     print("Request:")
     print(json.dumps(req, indent=4))
-
     res = processRequest(req)
-
     res = json.dumps(res, indent=4)
     # print(res)
     r = make_response(res)
     r.headers['Content-Type'] = 'application/json'
     return r
 
-
 def processRequest(req):
-    if req.get("result").get("action") != "yahooWeatherForecast":
-        return {}
-    baseurl = "https://query.yahooapis.com/v1/public/yql?"
-    yql_query = makeYqlQuery(req)
-    if yql_query is None:
-        return {}
-    yql_url = baseurl + urlencode({'q': yql_query}) + "&format=json"
-    result = urlopen(yql_url).read()
+    # if req.get("result").get("action") != "glassdoor_review":
+    #     return {}
+    baseurl = "http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=183304&t.k=bhWphgxkLDO&action=employers&q=prolifics"
+    +"&userip=192.168.1.44&useragent=Mozilla/%2F5.0"
+    header = {'User-Agent': 'Mozilla/5.0'}
+    result = requests(baseurl,headers=header).text.replace('\n','')
     data = json.loads(result)
     res = makeWebhookResult(data)
     return res
 
-
-def makeYqlQuery(req):
-    result = req.get("result")
-    parameters = result.get("parameters")
-    city = parameters.get("geo-city")
-    if city is None:
-        return None
-
-    return "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + city + "')"
-
-
 def makeWebhookResult(data):
-    query = data.get('query')
-    if query is None:
-        return {}
-
-    result = query.get('results')
-    if result is None:
-        return {}
-
-    channel = result.get('channel')
-    if channel is None:
-        return {}
-
-    item = channel.get('item')
-    location = channel.get('location')
-    units = channel.get('units')
-    if (location is None) or (item is None) or (units is None):
-        return {}
-
-    condition = item.get('condition')
-    if condition is None:
-        return {}
-
     # print(json.dumps(item, indent=4))
-
-    speech = "Today in " + location.get('city') + ": " + condition.get('text') + \
-             ", the temperature is " + condition.get('temp') + " " + units.get('temperature')
-
+    speech = "According to glassdoor ,these are the reviews that i found"
+    speech+="1.Pros "+ str(decoded['response']['employers'][0]['featuredReview']['pros'])
+    speech+="2.Cons "+ str(decoded['response']['employers'][0]['featuredReview']['cons'])
     print("Response:")
     print(speech)
 
