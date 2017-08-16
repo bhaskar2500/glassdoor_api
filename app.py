@@ -5,12 +5,15 @@ import os
 
 from flask import Flask
 from flask import request
-from flask import make_response
+from flask import make_response,render_template
 import requests
 
 # Flask app should start in global layout
 app = Flask(__name__)
 
+@app.route('/policy', methods=['GET','POST'])
+def private_policy():
+    return render_template('private_policy.html')
 
 @app.route('/webhook', methods=['GET','POST'])
 def webhook():
