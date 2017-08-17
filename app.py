@@ -51,7 +51,7 @@ def processRequest():
         return r
     except Exception as ex:
         print(ex)
-        return None 
+        return {'error':ex} 
 def makeWebhookResult(data):
     # print(json.dumps(item, indent=4))
     speech = "According to glassdoor ,these are the reviews that i found \n"
