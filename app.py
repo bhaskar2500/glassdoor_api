@@ -22,32 +22,36 @@ def private_policy():
 @app.route('/webhook', methods=['GET','POST'])
 def webhook():
     print('yes')
-    # req = request.get_json(silent=True, force=True)
-    # print("Request:"+req)
+    req = request.get_json(silent=True, force=True)
+    print("Request:"+req)
     try:
-        r=processRequest()
+        r=processRequest(req)
         r.headers['Content-Type'] = 'application/json'
     except Exception as ex:
+        print(ex)
         return None 
     return r
 
 def processRequest():
-    if req.get("result").get("action") != "glassdoor_review":
-         return {}
-    result = req.get("result")
-    paramters=result.get("paramters")
-    company=paramters.get("company")
-    baseurl = "http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=183304&t.k=bhWphgxkLDO&action=employers&q="+company+"
-    baseurl+="&userip=192.168.1.44&useragent=Mozilla/%2F5.0"
-    header = {'User-Agent': 'Mozilla/5.0'}
-    result = str(requests.request(url=baseurl,headers=header,method="GET").text).replace('\n','')
-    data = json.loads(result)
-    res = makeWebhookResult(data)
-    res = json.dumps(res, indent=4)
-    r = make_response(res)
-    r.headers['Content-Type'] = 'application/json'
-    return r
-
+    try:    
+        if req.get("result").get("action") != "glassdoor_review":
+             return {}
+        result = req.get("result")
+        paramters=result.get("paramters")
+        company=paramters.get("company")
+        baseurl = "http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=183304&t.k=bhWphgxkLDO&action=employers&q="+company
+        baseurl+="&userip=192.168.1.44&useragent=Mozilla/%2F5.0"
+        header = {'User-Agent': 'Mozilla/5.0'}
+        result = str(requests.request(url=baseurl,headers=header,method="GET").text).replace('\n','')
+        data = json.loads(result)
+        res = makeWebhookResult(data)
+        res = json.dumps(res, indent=4)
+        r = make_response(res)
+        r.headers['Content-Type'] = 'application/json'
+        return r
+    except Exception as ex:
+        print(ex)
+        return None 
 def makeWebhookResult(data):
     # print(json.dumps(item, indent=4))
     speech = "According to glassdoor ,these are the reviews that i found \n"
