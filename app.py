@@ -34,6 +34,8 @@ def webhook():
 
 def processRequest(req):
     try:    
+        print(type(req))
+        print(req["result"])
         if req["result"]["action"]!= "glassdoor_review":
              return {}
         else:
