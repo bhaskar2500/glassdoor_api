@@ -23,7 +23,7 @@ def private_policy():
 def webhook():
     try:
         req = request.get_json(silent=True, force=True)
-        r=processRequest(dict(req))    
+        processRequest(dict(req))    
     except Exception as ex:
         return(json.dumps({"error":str(ex),"type":str(type(r))}))
     return r
