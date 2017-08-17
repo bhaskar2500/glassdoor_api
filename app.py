@@ -22,14 +22,10 @@ def private_policy():
 @app.route('/webhook', methods=['GET','POST'])
 def webhook():
     try:
-        print('yes')
-        print(request)  
         req = request.get_json(silent=True, force=True)
-        print('===========',dict(req))
-        r=processRequest(dict(req))
-        r.headers['Content-Type'] = 'application/json'
+        r=processRequest(dict(req))    
     except Exception as ex:
-        print(ex)
+        return(json.dumps({"error":str(ex),"type":str(type(r))}))
     return r
 
 def processRequest(req):
@@ -38,8 +34,6 @@ def processRequest(req):
         print(req["result"])
         if req["result"]["action"]!= "glassdoor_review":
              return {}
-        else:
-            print('not found')
         result = req.get("result")
         paramters=result["paramters"]
         company=paramters["company"]
@@ -51,11 +45,12 @@ def processRequest(req):
         res = makeWebhookResult(data)
         res = json.dumps(res, indent=4)
         r = make_response(res)
-        r.headers['Content-Type'] = 'application/json'
+        print(type(r),'------------')
         return r
     except Exception as ex:
         print(ex)
-        return json.dumps({'error':ex}) 
+        return(json.dumps({"error":str(ex)}))
+
 def makeWebhookResult(data):
     # print(json.dumps(item, indent=4))
     speech = "According to glassdoor ,these are the reviews that i found \n"
