@@ -6,11 +6,15 @@ import os
 from flask import Flask
 from flask import request
 from flask import make_response
+from flask import render_template
 import requests
 
 # Flask app should start in global layout
 app = Flask(__name__)
 
+@app.route('/policy', methods=['GET','POST'])
+def term_policy():
+    return render_template("policy.html")
 
 @app.route('/webhook', methods=['GET','POST'])
 def webhook():
@@ -25,9 +29,12 @@ def webhook():
     return r
 
 def processRequest():
-    # if req.get("result").get("action") != "glassdoor_review":
-    #      return {}
-    baseurl = "http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=183304&t.k=bhWphgxkLDO&action=employers&q=prolifics"
+    if req.get("result").get("action") != "glassdoor_review":
+         return {}
+    result = req.get("result")
+    paramters=result.get("paramters")
+    company=paramters.get("company")
+    baseurl = "http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=183304&t.k=bhWphgxkLDO&action=employers&q="+company+"
     baseurl+="&userip=192.168.1.44&useragent=Mozilla/%2F5.0"
     header = {'User-Agent': 'Mozilla/5.0'}
     result = str(requests.request(url=baseurl,headers=header,method="GET").text).replace('\n','')
