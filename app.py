@@ -21,24 +21,26 @@ def private_policy():
 
 @app.route('/webhook', methods=['GET','POST'])
 def webhook():
-    print('yes')
-    req = request.get_json(silent=True, force=True)
-    print("Request:"+req)
     try:
-        r=processRequest(req)
+        print('yes')
+        print(request)  
+        req = request.get_json(silent=True, force=True)
+        print('===========',dict(req))
+        r=processRequest(dict(req))
         r.headers['Content-Type'] = 'application/json'
     except Exception as ex:
         print(ex)
-        return None 
     return r
 
-def processRequest():
+def processRequest(req):
     try:    
-        if req.get("result").get("action") != "glassdoor_review":
+        if req["result"]["action"]!= "glassdoor_review":
              return {}
+        else:
+            print('not found')
         result = req.get("result")
-        paramters=result.get("paramters")
-        company=paramters.get("company")
+        paramters=result["paramters"]
+        company=paramters["company"]
         baseurl = "http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=183304&t.k=bhWphgxkLDO&action=employers&q="+company
         baseurl+="&userip=192.168.1.44&useragent=Mozilla/%2F5.0"
         header = {'User-Agent': 'Mozilla/5.0'}
