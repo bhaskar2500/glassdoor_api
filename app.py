@@ -7,6 +7,7 @@ from flask import Flask
 from flask import request
 from flask import make_response
 from flask import render_template
+from flask import make_response,render_template
 import requests
 
 # Flask app should start in global layout
@@ -15,6 +16,8 @@ app = Flask(__name__)
 @app.route('/policy', methods=['GET','POST'])
 def term_policy():
     return render_template("policy.html")
+def private_policy():
+    return render_template('private_policy.html')
 
 @app.route('/webhook', methods=['GET','POST'])
 def webhook():
