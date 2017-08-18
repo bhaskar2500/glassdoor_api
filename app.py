@@ -5,8 +5,7 @@ import os
 
 from flask import Flask
 from flask import request
-from flask import make_response
-from flask import render_template
+from flask import render_template,jsonify
 from flask import make_response,render_template
 import requests
 
@@ -34,7 +33,7 @@ def processRequest(req):
         print(req["result"])
         if req["result"]["action"]!= "glassdoor_review":
              return {}
-        result = req.get("result")
+        result = req["result"]
         paramters=result["paramters"]
         company=paramters["company"]
         baseurl = "http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=183304&t.k=bhWphgxkLDO&action=employers&q="+company
@@ -43,9 +42,9 @@ def processRequest(req):
         result = str(requests.request(url=baseurl,headers=header,method="GET").text).replace('\n','')
         data = json.loads(result)
         res = makeWebhookResult(data)
-        res = json.dumps(res, indent=4)
+        res = jsonify(res)
         r = make_response(res)
-        print(type(r),'------------')
+        print(type(r))        
         return r
     except Exception as ex:
         print(ex)
