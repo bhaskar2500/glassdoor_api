@@ -43,9 +43,8 @@ def processRequest(req):
         data = json.loads(result)
         res = makeWebhookResult(data)
         res = jsonify(res)
-        r = make_response(res)
-        print(type(r))        
-        return r
+        print(type(res))        
+        return res
     except Exception as ex:
         print(ex)
         return(json.dumps({"error":str(ex)}))
