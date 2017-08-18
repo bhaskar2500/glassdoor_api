@@ -22,7 +22,14 @@ def private_policy():
 def webhook():
     try:
         req = request.get_json(silent=True, force=True)
-        processRequest(dict(req))    
+        res = json.dumps(req, indent=4)
+            
+        res=processRequest(req)    
+        res = json.dumps(res, indent=4)
+        r = make_response(res)
+        print(type(r))
+        r.headers['Content-Type'] = 'application/json'
+        return r
     except Exception as ex:
         return(json.dumps({"error":str(ex),"type":str(type(r))}))
     return r
@@ -30,20 +37,19 @@ def webhook():
 def processRequest(req):
     try:    
         print(type(req))
-        print(req["result"])
-        if req["result"]["action"]!= "glassdoor_review":
+        print(req.get("result"))
+        if req.get("result").get("action") != "glassdoor_review":
              return {}
-        result = req["result"]
-        paramters=result["paramters"]
-        company=paramters["company"]
+        result = req.get("result")
+        parameters=result.get("parameters")
+        company=parameters.get("company")
+        
         baseurl = "http://api.glassdoor.com/api/api.htm?v=1&format=json&t.p=183304&t.k=bhWphgxkLDO&action=employers&q="+company
         baseurl+="&userip=192.168.1.44&useragent=Mozilla/%2F5.0"
         header = {'User-Agent': 'Mozilla/5.0'}
         result = str(requests.request(url=baseurl,headers=header,method="GET").text).replace('\n','')
         data = json.loads(result)
         res = makeWebhookResult(data)
-        res = jsonify(res)
-        print(type(res))        
         return res
     except Exception as ex:
         print(ex)
@@ -54,8 +60,6 @@ def makeWebhookResult(data):
     speech = "According to glassdoor ,these are the reviews that i found \n"
     speech+="1.Pros "+ str(data['response']['employers'][0]['featuredReview']['pros'])+"\n"
     speech+="2.Cons "+ str(data['response']['employers'][0]['featuredReview']['cons'])+"\n"
-    print("Response:")
-    print(speech)
 
     return {
         "speech": speech,
